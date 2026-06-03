@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -28,10 +29,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $db = new PDO('sqlite:database.sqlite');
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
+
         // Ensure table exists
-        $db->exec("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password_hash TEXT)");
-        
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS users " .
+            "(id INTEGER PRIMARY KEY, username TEXT UNIQUE, password_hash TEXT)"
+        );
+
         // Check if username already exists
         $stmt = $db->prepare("SELECT id FROM users WHERE username = :username");
         $stmt->execute([':username' => $username]);
@@ -44,7 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // Insert new user
-        $stmt = $db->prepare("INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)");
+        $stmt = $db->prepare(
+            "INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)"
+        );
         $stmt->execute([
             ':username' => $username,
             ':password_hash' => $password_hash
@@ -54,7 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["username"] = $username;
         header("Location: welcome.php");
         exit();
-
     } catch (PDOException $e) {
         header("Location: signup.html?error=db");
         exit();
@@ -63,4 +68,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: signup.html");
     exit();
 }
-?>
