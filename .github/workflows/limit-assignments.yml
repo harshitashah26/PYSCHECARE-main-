@@ -48,7 +48,7 @@ jobs:
                 owner,
                 repo,
                 issue_number: issueNumber,
-                body: `👋 Hey @${assignee}! We love your enthusiasm, but it looks like you are already assigned to ${actualIssues.length - 1} other open issues.\n\nTo ensure everyone gets a fair chance to contribute (and to prevent issue hoarding), we have a strict **Max 3 Open Issues** limit per contributor. \n\nI have automatically unassigned you from this issue for now. Please complete and merge one of your existing assigned issues before claiming a new one! 🚀`
+                body: `👋 Hey @${assignee}! You cannot get more assignments at the moment because you have reached the limit. Please complete your previous assigned issues to get a new one! 🚀`
               });
             } else {
               console.log(`User ${assignee} has ${actualIssues.length} issues. Within limits.`);
