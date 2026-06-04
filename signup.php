@@ -2,9 +2,15 @@
 
 session_start();
 
+require_once __DIR__ . '/database.php';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    if (
+        empty($_POST['csrf_token']) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    ) {
         die("CSRF token validation failed");
     }
 
@@ -27,14 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Connect to local SQLite database
     try {
-        $db = new PDO('sqlite:database.sqlite');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Ensure table exists
-        $db->exec(
-            "CREATE TABLE IF NOT EXISTS users " .
-            "(id INTEGER PRIMARY KEY, username TEXT UNIQUE, password_hash TEXT)"
-        );
+        $db = getAuthDatabase();
 
         // Check if username already exists
         $stmt = $db->prepare("SELECT id FROM users WHERE username = :username");
@@ -57,6 +56,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         // Automatically log in user after successful signup
+        session_regenerate_id(true);
+        $_SESSION["user_id"] = $db->lastInsertId();
         $_SESSION["username"] = $username;
         header("Location: welcome.php");
         exit();
