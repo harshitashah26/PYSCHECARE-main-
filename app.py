@@ -1,4 +1,5 @@
 import os
+import uuid
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -21,8 +22,12 @@ def chat():
     data = request.get_json()
     if not data or "message" not in data:
         return jsonify({"error": "Missing message"}), 400
-    response = get_chatbot_response(data["message"])
-    return jsonify({"response": response})
+    
+    # Use session ID from request or generate a unique one
+    user_id = data.get("session_id") or str(uuid.uuid4())
+    
+    response = get_chatbot_response(data["message"], user_id)
+    return jsonify({"response": response, "session_id": user_id})
 
 if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"

@@ -41,7 +41,16 @@ words = []
 classes = []
 model = None
 intents = {}
-context: Dict[str, str] = {}
+import time
+context: dict = {}
+CONTEXT_TTL = 1800  # 30 minutes
+
+def _clean_context():
+    """Remove context entries older than TTL."""
+    now = time.time()
+    expired = [uid for uid, val in context.items() if now - val.get("timestamp", 0) > CONTEXT_TTL]
+    for uid in expired:
+        del context[uid]
 
 def load_chatbot_model():
     """
@@ -166,11 +175,11 @@ def get_chatbot_response(message, user_id="000"):
                 for intent in intents["intents"]:  # loop through intents
                     if intent["tag"] == results[0][0]:  # if tag matches
                         if intent["tag"].lower() == "reiterate":  # if tag is reiterate
-                            if context.get(user_id):  # if context exists
+                            if context.get(user_id, {}).get("value") :  # if context exists
                                 for tg in intents["intents"]:
                                     if (
                                         "context_set" in tg
-                                        and tg["context_set"] == context[user_id]
+                                        and tg["context_set"] == context[user_id] = {"value": intent["context_set"], "timestamp": time.time()}
                                     ):
                                         response = random.choice(tg["responses"])
                                         return str(response)
@@ -178,7 +187,7 @@ def get_chatbot_response(message, user_id="000"):
                                 response = random.choice(intent["responses"])
                                 return str(response)
                         if "context_set" in intent and intent["context_set"] != "":
-                            context[user_id] = intent["context_set"]
+                            context[user_id] = {"value": intent["context_set"], "timestamp": time.time()}
                         response = random.choice(intent["responses"])
                         return str(response)
                 results.pop(0)
