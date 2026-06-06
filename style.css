@@ -1,16 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap');
-
+@import url("otherStylesheet/accessibility.css");
 
 
 :root{
     --light-color:#F5F7F9;
+    --light-color2:#F5F7F9;
     --dark-color:#2D3142;
     --primary-color:#7F5AF0;
     --lightvarient-darkColor:#2D3142df;
     --black-color:#000;
     --shadow-color:#e9e6f5;
+
+    --font-scale: 1;
 }
 
 
@@ -29,6 +32,8 @@ body{
     font-family: 'Poppins', sans-serif;
     background-color: var(--light-color);
     line-height: 1.5em;
+
+    font-size: calc(16px * var(--font-scale));
 }
 
 
@@ -982,7 +987,7 @@ p::selection{
 }
 
 .more-card-content p{
-    color:var(--light-color);
+    color:var(--light-color2);
     font-weight: 300;
 }
 
@@ -1393,3 +1398,4 @@ p::selection{
 .delay-300 {
     animation-delay: 0.3s;
 }
+
