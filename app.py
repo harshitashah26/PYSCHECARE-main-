@@ -9,6 +9,10 @@ from flask_limiter.util import get_remote_address
 from chatbot_integration import get_chatbot_response
 
 app = Flask(__name__)
+# ── Global Payload Size Limit ────────────────────────────────────────────────
+# Prevent memory exhaustion attacks across the entire app by rejecting payloads
+# larger than 5KB (default Flask allows unlimited payload sizes).
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024
 
 # ── CORS ────────────────────────────────────────────────────────────────────
 # Read allowed origin from environment variable — fail closed if not set
@@ -87,12 +91,19 @@ def chat():
     if not data or "message" not in data:
         return jsonify({"error": "Missing message"}), 400
 
+    # ── Advanced: Algorithmic Complexity DoS Protection ──────────────────────
+    # NLTK tokenization and the autocorrect Speller() are computationally heavy.
+    # An extremely long input will hang the server (ReDoS / exhaustion attack).
+    # We enforce a strict 500-character limit per message.
     # Advanced: Algorithmic Complexity DoS Protection
     message = data["message"]
     if not isinstance(message, str) or len(message) > 500:
         return jsonify({
             "error": "Message too long. Maximum length is 500 characters."
         }), 400
+
+    # Use session ID from request or generate a unique one
+    user_id = data.get("session_id") or str(uuid.uuid4())
 
     # Secure Context Mapping: user_id strictly derived from HMAC signature.
     # We NO LONGER accept session_id from the client payload.
